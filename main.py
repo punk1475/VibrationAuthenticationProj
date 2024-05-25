@@ -105,15 +105,15 @@ def get_value_of_net(model, data_pair):
 if __name__ == '__main__':
     data_controller = DataController(TRAIN_DATA_PATH, 3)
     train_data = SiameseNetDataSet(data_controller)
-    train_loader = DataLoader(train_data, shuffle=False, batch_size=5, num_workers=8, pin_memory=True)
+    train_loader = DataLoader(train_data, shuffle=False, batch_size=5, pin_memory=True)
 
     test_data = SiameseNetDataSet(data_controller)
-    test_loader = DataLoader(test_data, shuffle=False, batch_size=5, num_workers=8, pin_memory=True)
+    test_loader = DataLoader(test_data, shuffle=False, batch_size=5, pin_memory=True)
 
     # FIXME:这里在服务器训练时需要修改
     net = SiameseNet(3, 2, 3, 512, 8).cuda()
     criterion = ContrastiveLoss(2).cuda()
-    max_epoch_num = 1000
+    max_epoch_num = 6
     optimizer = optim.Adam(net.parameters(), lr=0.0005)
     last_loss = MyUtil.load_existed_model(net, criterion, optimizer, MODEL_PATH)
 

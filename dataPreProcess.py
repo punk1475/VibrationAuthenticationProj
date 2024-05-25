@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
+import random
+
 import pywt
 import torch
 import numpy as np
 import pandas as pd
 from typing import Tuple, Dict, List, Any
 
+from matplotlib import pyplot as plt
 from torch import Tensor
 
 from dataPrePlot import DataPrePlotter
@@ -189,8 +192,6 @@ class DataPreprocess:
 
 
 if __name__ == '__main__':
-    data_frames, titles = folder_read(RELATED_PATH_TO_CSV, suffix='.csv')
-
-    for acceleration in data_frames:
-        DataPreprocess.data_pre_entry(acceleration, pattern='default', expect_label='acc_x',
-                                      plot_choice='cwt_plot_cepstrum')
+    list = [random.randint(0, 1000) for i in range(10)]
+    plt.plot(range(0, list.__len__()), list)
+    plt.savefig("train.png")
