@@ -4,7 +4,10 @@ import pywt
 import torch
 import numpy as np
 import pandas as pd
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List, Any
+
+from torch import Tensor
+
 from dataPrePlot import DataPrePlotter
 from dataPreMath import DataPreMath
 from scipy.fftpack import fft, ifft
@@ -85,7 +88,7 @@ class DataPreprocess:
                        plot_choice: str = 'None',
                        frequency_threshold: int = 50,
                        window_time: int = 300, steady_window_time: int = 50,
-                       wavelet_name: str = 'morl', total_scales: int = 256) -> Tuple[Dict[str, torch.Tensor], Dict[str, torch.Tensor], Dict[str, torch.Tensor], str]:
+                       wavelet_name: str = 'morl', total_scales: int = 256) -> list[dict[str, Tensor] | Any] | None:
         """
         数据处理的入口函数。对信号进行CWT和倒谱处理，标签列只要求信号的xyz三轴加速度和对应时间戳部分。
         一些注意事项：
@@ -150,7 +153,7 @@ class DataPreprocess:
                 print('data pre result len error')
                 return
 
-            return data_pre_result[0], data_pre_result[1], data_pre_result[2], main_axis
+            return [data_pre_result[0], data_pre_result[1], data_pre_result[2], main_axis]
 
         if pattern == 'debug':
             data_cwt = []

@@ -69,3 +69,4 @@ class MyUtil:
         label_vec1 = df1.iloc[0, 0:5].tolist()
         label_vec2 = df2.iloc[0, 0:5].tolist()
         return [label_vec1, label_vec2], df1["filename"].tolist() + df2["filename"].tolist()
+

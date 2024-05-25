@@ -12,7 +12,7 @@ from torch import optim
 from torch.utils.data import DataLoader
 
 import myutil
-from data import SiameseNetDataSet
+from data import SiameseNetDataSet, DataController
 from myutil import MyUtil
 from net import SiameseNet, ContrastiveLoss
 
@@ -103,11 +103,12 @@ def get_value_of_net(model, data_pair):
 
 # 按间距中的绿色按钮以运行脚本。
 if __name__ == '__main__':
-    train_data = SiameseNetDataSet(TRAIN_DATA_PATH, 3)
-    train_loader = DataLoader(train_data, shuffle=True, batch_size=5, num_workers=4, pin_memory=True)
+    data_controller = DataController(TRAIN_DATA_PATH, 3)
+    train_data = SiameseNetDataSet(data_controller)
+    train_loader = DataLoader(train_data, shuffle=False, batch_size=5, num_workers=8, pin_memory=True)
 
-    test_data = SiameseNetDataSet(TRAIN_DATA_PATH, 3)
-    test_loader = DataLoader(test_data, shuffle=False, batch_size=5, num_workers=4, pin_memory=True)
+    test_data = SiameseNetDataSet(data_controller)
+    test_loader = DataLoader(test_data, shuffle=False, batch_size=5, num_workers=8, pin_memory=True)
 
     # FIXME:这里在服务器训练时需要修改
     net = SiameseNet(3, 2, 3, 512, 8).cuda()
