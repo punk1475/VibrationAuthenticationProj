@@ -22,7 +22,7 @@ TEST_DATA_PATH = "../data_repository/data_for_proj2/test"
 
 
 def train(model, epoch_num, optimizer_par, train_data_loader_par, loss_net_par, vali_data_loader_par, train_last_loss,
-          threshold=5):
+          threshold=10):
     train_history = []
     bk_time = 0
     check_interval = 5
@@ -33,8 +33,8 @@ def train(model, epoch_num, optimizer_par, train_data_loader_par, loss_net_par, 
             __data_pair1, __data_pair2, __data_pair3, __same_flag = __data
             __data_pair = MyUtil.set_data_on_cuda(__data_pair1, __data_pair2, __data_pair3)
 
-            gc.collect()
-            torch.cuda.empty_cache()
+            # gc.collect()
+            # torch.cuda.empty_cache()
 
             optimizer_par.zero_grad()
             output1, output2 = model(__data_pair)
@@ -54,7 +54,7 @@ def train(model, epoch_num, optimizer_par, train_data_loader_par, loss_net_par, 
             # loss.backward()
             # optimizer_par.step()
 
-        print(f"Epoch number: {epoch}\n")
+        # print(f"Epoch number: {epoch}\n")
         if epoch % check_interval == reminder:
             _loss_val = val(model, vali_data_loader_par, loss_net_par)
             train_history.append(_loss_val)
@@ -66,7 +66,7 @@ def train(model, epoch_num, optimizer_par, train_data_loader_par, loss_net_par, 
                 if bk_time + threshold*check_interval < epoch:
                     break
     plt.plot(range(0, train_history.__len__()), train_history)
-    plt.show()
+    plt.savefig("train.png")
 
 
 def val(model, val_data_loader, val_criterion):
@@ -76,8 +76,8 @@ def val(model, val_data_loader, val_criterion):
         _loss_value = 0
         __data_pair1, __data_pair2, __data_pair3, __same_flag = __data
         __data_pair = MyUtil.set_data_on_cuda(__data_pair1, __data_pair2, __data_pair3)
-        gc.collect()
-        torch.cuda.empty_cache()
+        # gc.collect()
+        # torch.cuda.empty_cache()
         with torch.no_grad():
             _output1, _output2 = model(__data_pair)
             _loss_value += val_criterion(_output1, _output2, __same_flag).cpu().item()
@@ -90,7 +90,7 @@ def val(model, val_data_loader, val_criterion):
 
             total_loss += _loss_value * len(__same_flag)
     avg_loss = total_loss / len(val_data_loader.dataset)
-    print(f"score:{avg_loss}")
+    # print(f"score:{avg_loss}")
     return avg_loss
 
 
@@ -104,12 +104,13 @@ def get_value_of_net(model, data_pair):
 # 按间距中的绿色按钮以运行脚本。
 if __name__ == '__main__':
     train_data = SiameseNetDataSet(TRAIN_DATA_PATH, 3)
-    train_loader = DataLoader(train_data, shuffle=True, batch_size=3)
+    train_loader = DataLoader(train_data, shuffle=True, batch_size=5, num_workers=4, pin_memory=True)
 
     test_data = SiameseNetDataSet(TRAIN_DATA_PATH, 3)
-    test_loader = DataLoader(test_data, shuffle=False, batch_size=5)
+    test_loader = DataLoader(test_data, shuffle=False, batch_size=5, num_workers=4, pin_memory=True)
 
-    net = SiameseNet(3, 2, 3, 1000, 5).cuda()
+    # FIXME:这里在服务器训练时需要修改
+    net = SiameseNet(3, 2, 3, 512, 8).cuda()
     criterion = ContrastiveLoss(2).cuda()
     max_epoch_num = 1000
     optimizer = optim.Adam(net.parameters(), lr=0.0005)

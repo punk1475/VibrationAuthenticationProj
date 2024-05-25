@@ -74,8 +74,8 @@ class SiameseNet(nn.Module):
             nn.Linear(self.fc_height, hideNeuronalNum),
             nn.ReLU(inplace=True),
 
-            # nn.Linear(hideNeuronalNum, hideNeuronalNum),
-            # nn.ReLU(inplace=True),
+            nn.Linear(hideNeuronalNum, hideNeuronalNum),
+            nn.ReLU(inplace=True),
 
             nn.Linear(hideNeuronalNum, outNeuronalNum)
         )
