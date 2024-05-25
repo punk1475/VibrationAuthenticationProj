@@ -139,7 +139,7 @@ class DataPreprocess:
                                                                frequency_threshold)
                     data_cepstrum = DataPreprocess.get_fft_cepstrum(filtered_signal.ravel(), fs)
 
-                    cwt_tensor_list.append(torch.from_numpy(DataPreMath.cut_cwt(data_cwt[0])))
+                    cwt_tensor_list.append(torch.from_numpy(data_cwt[0][50:, :]))
                     cepstrum_tensor_list.append(torch.from_numpy(data_cepstrum[:100]))
 
                 cwt_tensor = torch.stack(cwt_tensor_list, dim=0)

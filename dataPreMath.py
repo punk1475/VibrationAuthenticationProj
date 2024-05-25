@@ -115,12 +115,17 @@ class DataPreMath:
         # 计算差值列表
         differences = [index_list[i + 1] - index_list[i] for i in range(0, len(index_list), 2)]
 
+        for i in range(len(differences)):
+            differences[i] = round(differences[i] / 5) * 5
+
         # 找到最大差值和最小差值
         max_diff = max(differences)
         min_diff = min(differences)
 
         # 如果所有差值都相同，则不需要调整
         if max_diff == min_diff:
+            for i in range(int(len(index_list)/2)):
+                index_list[2*i+1] = index_list[2*i] + differences[i]
             return index_list
 
         # 如果差值都不同，则选择差值位于中间的那个

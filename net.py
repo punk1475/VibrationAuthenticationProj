@@ -74,9 +74,20 @@ class SiameseNet(nn.Module):
             nn.Linear(self.fc_height, hideNeuronalNum),
             nn.ReLU(inplace=True),
 
-            nn.Linear(hideNeuronalNum, outNeuronalNum),
-            nn.ReLU(inplace=True)
+            # nn.Linear(hideNeuronalNum, hideNeuronalNum),
+            # nn.ReLU(inplace=True),
+
+            nn.Linear(hideNeuronalNum, outNeuronalNum)
         )
+        for layer in self.fc:
+            if isinstance(layer, nn.Linear):
+                nn.init.xavier_uniform_(layer.weight)
+        for layer in self.cnn_for_transient:
+            if isinstance(layer, nn.Conv2d):
+                nn.init.xavier_uniform_(layer.weight)
+        for layer in self.cnn_for_steady:
+            if isinstance(layer, nn.Conv1d):
+                nn.init.xavier_uniform_(layer.weight)
 
     def forward_one(self, feature_steady, feature_transient):
         __output_steady = self.cnn_for_steady(feature_steady)

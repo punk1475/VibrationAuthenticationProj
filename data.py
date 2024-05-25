@@ -15,7 +15,7 @@ class SiameseNetDataSet(data.Dataset):
         dir_list = os.listdir(dir_str)
         ori_len = 0
         if dir_list.__len__() != 0:
-            ori_len = dir_list.__len__() * os.listdir(dir_str + '/' + dir_list[0]).__len__()
+            ori_len = int(dir_list.__len__() * os.listdir(dir_str + '/' + dir_list[0]).__len__()/2)
         self.root_dir_str = dir_str
         self.length = ori_len
         self.dir_list = dir_list
@@ -29,7 +29,7 @@ class SiameseNetDataSet(data.Dataset):
             meta = pd.read_csv(meta_path)
             pair_candidate = meta.sample(n=2, random_state=numpy.random.RandomState(), axis=0, replace=False)
             label_vec_list, path_list = MyUtil.get_label_pair_from_one_dataframe(pair_candidate)
-            while MyUtil.dataIsSimilar(label_vec_list[0], label_vec_list[1]):
+            while MyUtil.dataIsSimilar(label_vec_list[0], label_vec_list[1])[0]:
                 pair_candidate = meta.sample(n=2, random_state=numpy.random.RandomState(), axis=0, replace=False)
                 label_vec_list, path_list = MyUtil.get_label_pair_from_one_dataframe(pair_candidate)
             path1 = self.root_dir_str + '/' + dir1 + '/' + path_list[0]
@@ -45,7 +45,7 @@ class SiameseNetDataSet(data.Dataset):
             candidate1 = meta1.sample(n=1, random_state=numpy.random.RandomState(), axis=0)
             candidate2 = meta2.sample(n=1, random_state=numpy.random.RandomState(), axis=0)
             label_vec_list, path_list = MyUtil.get_label_pair_from_dataframe_pair(candidate1, candidate2)
-            while not MyUtil.dataIsSimilar(label_vec_list[0], label_vec_list[1]):
+            while not MyUtil.dataIsSimilar(label_vec_list[0], label_vec_list[1])[0]:
                 candidate1 = meta1.sample(n=1, random_state=numpy.random.RandomState(), axis=0)
                 candidate2 = meta2.sample(n=1, random_state=numpy.random.RandomState(), axis=0)
                 label_vec_list, path_list = MyUtil.get_label_pair_from_dataframe_pair(candidate1, candidate2)
