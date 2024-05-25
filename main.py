@@ -75,18 +75,18 @@ def val(model, val_data_loader, val_criterion):
     for __data in val_data_loader:
         _loss_value = 0
         __data_pair1, __data_pair2, __data_pair3, __same_flag = __data
-        __data_pair1, __data_pair2, __data_pair3 = MyUtil.set_data_on_cuda(__data_pair1, __data_pair2, __data_pair3)
+        __data_pair = MyUtil.set_data_on_cuda(__data_pair1, __data_pair2, __data_pair3)
         gc.collect()
         torch.cuda.empty_cache()
         with torch.no_grad():
-            _output1, _output2 = model(__data_pair1)
+            _output1, _output2 = model(__data_pair)
             _loss_value += val_criterion(_output1, _output2, __same_flag).cpu().item()
 
-            _output1, _output2 = model(__data_pair2)
-            _loss_value += val_criterion(_output1, _output2, __same_flag).cpu().item()
-
-            _output1, _output2 = model(__data_pair3)
-            _loss_value += val_criterion(_output1, _output2, __same_flag).cpu().item()
+            # _output1, _output2 = model(__data_pair2)
+            # _loss_value += val_criterion(_output1, _output2, __same_flag).cpu().item()
+            #
+            # _output1, _output2 = model(__data_pair3)
+            # _loss_value += val_criterion(_output1, _output2, __same_flag).cpu().item()
 
             total_loss += _loss_value * len(__same_flag)
     avg_loss = total_loss / len(val_data_loader.dataset)
