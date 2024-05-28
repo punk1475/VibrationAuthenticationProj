@@ -153,7 +153,7 @@ class DataPreprocess:
                 data_pre_result.append({'cwt_tensor': cwt_tensor, 'cepstrum_tensor': cepstrum_tensor})
 
             if len(data_pre_result) != 3:
-                print('data pre result len error')
+                print('dataSet pre result len error')
                 return
 
             return [data_pre_result[0], data_pre_result[1], data_pre_result[2], main_axis]

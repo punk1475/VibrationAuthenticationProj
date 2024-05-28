@@ -50,9 +50,21 @@ class SiameseNetDataSet(data.Dataset):
             data_pre2 = self.data_dic[dir2][file_name_list[1]]
         return [data_pre1[0], data_pre2[0]], [data_pre1[1], data_pre2[1]], [data_pre1[2], data_pre2[2]], same
 
-
     def __len__(self):
         return self.length
+
+
+# 此DataSet batch固定为1
+class DataSetWithName(data.Dataset):
+    def __init__(self, username, file_dic):
+        self.username = username
+        self.file_list = list(file_dic.values())
+
+    def __getitem__(self, index):
+        return self.file_list[index], self.username
+
+    def __len__(self):
+        return len(self.file_list)
 
 
 class DataController:
@@ -64,15 +76,15 @@ class DataController:
         data_dic = {}
         ori_len = 0
         if dir_list.__len__() != 0:
-            ori_len = int(dir_list.__len__() * os.listdir(dir_str + '/' + dir_list[0]).__len__()/2)
+            ori_len = dir_list.__len__() * os.listdir(dir_str + '/' + dir_list[0]).__len__()
             for user_dir in dir_list:
                 meta_pd = pd.read_csv(self.root_dir_str + '/' + user_dir + '/' + user_dir + '.meta')
                 meta_dic[user_dir] = meta_pd
-                file_names = os.listdir(dir_str+"/"+user_dir)
+                file_names = os.listdir(dir_str + "/" + user_dir)
                 file_dic = {}
                 for data_file in file_names:
                     if data_file.endswith("csv"):
-                        data_pd = pd.read_csv(dir_str+"/"+user_dir+"/"+data_file, usecols=[4, 5, 6, 7])
+                        data_pd = pd.read_csv(dir_str + "/" + user_dir + "/" + data_file, usecols=[4, 5, 6, 7])
                         data_pre = DataPreprocess.data_pre_entry(data_pd)
                         file_dic[data_file] = data_pre
                 data_dic[user_dir] = file_dic
@@ -80,4 +92,3 @@ class DataController:
             self.meta_dic = meta_dic
         self.length = ori_len
         self.dir_list = dir_list
-

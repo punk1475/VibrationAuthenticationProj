@@ -10,65 +10,81 @@ class SiameseNet(nn.Module):
                  hideNeuronalNum, outNeuronalNum):
         super().__init__()
         self.cnn_for_steady = nn.Sequential(
-            nn.Conv1d(inputChannels, outputChannels, kernel_size=kernelSize),
-            nn.BatchNorm1d(outputChannels),
+            nn.ReflectionPad1d(1),
+            nn.Conv1d(inputChannels, 2*outputChannels, kernel_size=kernelSize),
+            nn.BatchNorm1d(2 * outputChannels),
             nn.ReLU(),
 
-            nn.Conv1d(outputChannels, 2*outputChannels, kernel_size=kernelSize),
-            nn.BatchNorm1d(2*outputChannels),
+
+            nn.ReflectionPad1d(1),
+            nn.Conv1d(2*outputChannels, 2*outputChannels, kernel_size=kernelSize),
+            nn.BatchNorm1d(2 * outputChannels),
             nn.ReLU(),
 
+
+            nn.ReflectionPad1d(1),
             nn.Conv1d(2*outputChannels, 4 * outputChannels, kernel_size=kernelSize),
             nn.BatchNorm1d(4 * outputChannels),
             nn.ReLU(),
 
-            nn.Conv1d(4 * outputChannels, 6 * outputChannels, kernel_size=kernelSize),
-            nn.BatchNorm1d(6 * outputChannels),
+
+            nn.ReflectionPad1d(1),
+            nn.Conv1d(4 * outputChannels, 8 * outputChannels, kernel_size=kernelSize),
+            nn.BatchNorm1d(8 * outputChannels),
             nn.ReLU(),
 
-            nn.Conv1d(6 * outputChannels, 10 * outputChannels, kernel_size=kernelSize),
-            nn.BatchNorm1d(10 * outputChannels),
+            nn.ReflectionPad1d(1),
+            nn.Conv1d(8 * outputChannels, 8 * outputChannels, kernel_size=kernelSize),
+            nn.BatchNorm1d(8 * outputChannels),
             nn.ReLU(),
 
-            nn.Conv1d(10 * outputChannels, 16 * outputChannels, kernel_size=kernelSize),
+
+            nn.ReflectionPad1d(1),
+            nn.Conv1d(8 * outputChannels, 16 * outputChannels, kernel_size=kernelSize),
             nn.BatchNorm1d(16 * outputChannels),
             nn.ReLU(),
+
 
 
             nn.Flatten()
         )
 
         self.cnn_for_transient = nn.Sequential(
-            nn.Conv2d(inputChannels, outputChannels, kernel_size=kernelSize),
-            nn.BatchNorm2d(outputChannels),
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(inputChannels, 2*outputChannels, kernel_size=kernelSize),
+            nn.BatchNorm2d(2 * outputChannels),
             nn.ReLU(),
 
-            nn.Conv2d(outputChannels, 2 * outputChannels, kernel_size=kernelSize),
-            nn.BatchNorm2d(2*outputChannels),
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(2*outputChannels, 2 * outputChannels, kernel_size=kernelSize),
+            nn.BatchNorm2d(2 * outputChannels),
             nn.ReLU(),
 
+            nn.ReflectionPad2d(1),
             nn.Conv2d(2 * outputChannels, 4 * outputChannels, kernel_size=kernelSize),
             nn.BatchNorm2d(4 * outputChannels),
             nn.ReLU(),
 
-            nn.Conv2d(4 * outputChannels, 6 * outputChannels, kernel_size=kernelSize),
-            nn.BatchNorm2d(6 * outputChannels),
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(4 * outputChannels, 8 * outputChannels, kernel_size=kernelSize),
+            nn.BatchNorm2d(8 * outputChannels),
             nn.ReLU(),
 
-            nn.Conv2d(6 * outputChannels, 10 * outputChannels, kernel_size=kernelSize),
-            nn.BatchNorm2d(10 * outputChannels),
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(8 * outputChannels, 8 * outputChannels, kernel_size=kernelSize),
+            nn.BatchNorm2d(8 * outputChannels),
             nn.ReLU(),
 
-            nn.Conv2d(10 * outputChannels, 16 * outputChannels, kernel_size=kernelSize),
+            nn.ReflectionPad2d(1),
+            nn.Conv2d(8 * outputChannels, 16 * outputChannels, kernel_size=kernelSize),
             nn.BatchNorm2d(16 * outputChannels),
             nn.ReLU(),
             # 为了支持不同采样率的设备，增设了自适应平均池化层，如果影响效果可以考虑去掉
-            # 考虑最低采样为400hz，取稳态为100，瞬态为205*36，在经过6层cnn后，稳态长100-6*2=88，瞬态长193*24
-            nn.AdaptiveAvgPool2d((None, 24)),
+            # 考虑最低采样为400hz，取稳态为100，瞬态为205*45，在经过6层cnn后，稳态长100-6*2=88，瞬态长193*33
             nn.Flatten()
         )
 
-        self.fc_height = 16*outputChannels*(193*24+88)
+        self.fc_height = 16*outputChannels*(205*45+100)
 
         self.fc = nn.Sequential(
             nn.Linear(self.fc_height, hideNeuronalNum),
@@ -79,15 +95,15 @@ class SiameseNet(nn.Module):
 
             nn.Linear(hideNeuronalNum, outNeuronalNum)
         )
-        for layer in self.fc:
-            if isinstance(layer, nn.Linear):
-                nn.init.xavier_uniform_(layer.weight)
-        for layer in self.cnn_for_transient:
-            if isinstance(layer, nn.Conv2d):
-                nn.init.xavier_uniform_(layer.weight)
-        for layer in self.cnn_for_steady:
-            if isinstance(layer, nn.Conv1d):
-                nn.init.xavier_uniform_(layer.weight)
+        # for layer in self.fc:
+        #     if isinstance(layer, nn.Linear):
+        #         nn.init.kaiming_normal_(layer.weight)
+        # for layer in self.cnn_for_transient:
+        #     if isinstance(layer, nn.Conv2d):
+        #         nn.init.xavier_uniform_(layer.weight)
+        # for layer in self.cnn_for_steady:
+        #     if isinstance(layer, nn.Conv1d):
+        #         nn.init.xavier_uniform_(layer.weight)
 
     def forward_one(self, feature_steady, feature_transient):
         __output_steady = self.cnn_for_steady(feature_steady)
